@@ -1,560 +1,327 @@
-
 #include <Arduino.h>
-
-// #include <IRremote.h>
-
-// int IR_RECEIVE_PIN = 15;
-
-// IRsend irsend;
-// IRrecv irrecv(IR_RECEIVE_PIN);
-
-// unsigned long previousMillis = 0;
-// long OnTime = 10000;           // milliseconds of on-time of IR
-
-// // On the Zero and others we switch explicitly to SerialUSB
-// #if defined(ARDUINO_ARCH_SAMD)
-// #define Serial SerialUSB
-// #endif
-
-
-
-// void sendData(){
-
-// 		unsigned long currentMillis = millis();
-//     if(currentMillis - previousMillis >= OnTime){
-// 			previousMillis = currentMillis; // Remember the time
-
-    
-
-//         int khz = 38; // 38kHz carrier frequency for the NEC protocol
-//     /*
-//      * Send data from RAM
-//      */
-//     // unsigned int irSignal[] = { 9000, 4500, 560, 560, 560, 560, 560, 1690, 560, 560, 560, 560, 560, 560, 560, 560, 560, 560, 560,
-//     //         1690, 560, 1690, 560, 560, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 560, 560, 560, 560, 560, 560,
-//     //         1690, 560, 560, 560, 560, 560, 560, 560, 560, 560, 1690, 560, 1690, 560, 1690, 560, 560, 560, 1690, 560, 1690, 560,
-//     //         1690, 560, 1690, 560, 39416, 9000, 2210, 560 }; // AnalysIR Batch Export (IRremote) - RAW
-//     // irsend.sendRaw(irSignal, sizeof(irSignal) / sizeof(irSignal[0]), khz); // Note the approach used to automatically calculate the size of the array.
-
-//     // delay(2000);
-//     /*
-//      * Send data direct from FLASH
-//      */
-//     // Serial.println("Sending");
-//     unsigned int irSignalP[] PROGMEM = { 2650,900, 450,400, 500,400, 450,850, 450,850, 900,400, 500,400, 450,400, 450,450, 450,400, 450,450, 450,400, 450,450, 450,400, 450,400, 450,450, 450,400, 500,400, 450,400, 450,450, 450,400, 900,400, 500,800, 500,400, 450 }; // AnalysIR Batch Export (IRremote) - RAW
-//     irsend.sendRaw_P(irSignalP, sizeof(irSignalP) / sizeof(irSignalP[0]), khz); // Note the approach used to automatically calculate the size of the array.
-//     // irsend.sendNEC();
-//         // unsigned long tData = 0x9DCF5C22;
-//     // for (int i = 0; i < 3; i++) {
-//         // irsend.sendNEC(tData, 32,false);
-//         Serial.print("Sending");
-//     }
-
-//      //In this example, the signal will be repeated every 7 seconds, approximately.
-// }
-// void dumpRaw(decode_results *results) {
-//     // Print Raw data
-//     Serial.print("Timing[");
-//     Serial.print(results->rawlen - 1, DEC);
-//     Serial.println("]: ");
-
-//     for (unsigned int i = 1; i < results->rawlen; i++) {
-//         unsigned long x = results->rawbuf[i] * MICROS_PER_TICK;
-//         if (!(i & 1)) {  // even
-//             Serial.print("-");
-//             if (x < 1000)
-//                 Serial.print(" ");
-//             if (x < 100)
-//                 Serial.print(" ");
-//             Serial.print(x, DEC);
-//         } else {  // odd
-//             Serial.print("     ");
-//             Serial.print("+");
-//             if (x < 1000)
-//                 Serial.print(" ");
-//             if (x < 100)
-//                 Serial.print(" ");
-//             Serial.print(x, DEC);
-//             if (i < results->rawlen - 1)
-//                 Serial.print(", "); //',' not needed for last one
-//         }
-//         if (!(i % 8))
-//             Serial.println("");
-//     }
-//     Serial.println("");                    // Newline
-// }
-
-// void encoding(decode_results *results) {
-//     switch (results->decode_type) {
-//     default:
-//     case UNKNOWN:
-//         Serial.print("UNKNOWN");
-//         break;
-//     case NEC:
-//         Serial.print("NEC");
-//         break;
-//     case SONY:
-//         Serial.print("SONY");
-//         break;
-//     case RC5:
-//         Serial.print("RC5");
-//         break;
-//     case RC6:
-//         Serial.print("RC6");
-//         break;
-//     case DISH:
-//         Serial.print("DISH");
-//         break;
-//     case SHARP:
-//         Serial.print("SHARP");
-//         break;
-//     case SHARP_ALT:
-//         Serial.print("SHARP_ALT");
-//         break;
-//     case JVC:
-//         Serial.print("JVC");
-//         break;
-//     case SANYO:
-//         Serial.print("SANYO");
-//         break;
-//     case MITSUBISHI:
-//         Serial.print("MITSUBISHI");
-//         break;
-//     case SAMSUNG:
-//         Serial.print("SAMSUNG");
-//         break;
-//     case LG:
-//         Serial.print("LG");
-//         break;
-//     case WHYNTER:
-//         Serial.print("WHYNTER");
-//         break;
-//     case AIWA_RC_T501:
-//         Serial.print("AIWA_RC_T501");
-//         break;
-//     case PANASONIC:
-//         Serial.print("PANASONIC");
-//         break;
-//     case DENON:
-//         Serial.print("Denon");
-//         break;
-//     case BOSEWAVE:
-//         Serial.print("BOSEWAVE");
-//         break;
-//     }
-// }
-// void ircode(decode_results *results) {
-//     // Panasonic has an Address
-//     if (results->decode_type == PANASONIC) {
-//         Serial.print(results->address, HEX);
-//         Serial.print(":");
-//     }
-
-//     // Print Code
-//     Serial.print(results->value, HEX);
-// }
-
-
-// //+=============================================================================
-// // Dump out the decode_results structure.
-// //
-// void dumpInfo(decode_results *results) {
-//     // Check if the buffer overflowed
-//     if (results->overflow) {
-//         Serial.println("IR code too long. Edit IRremoteInt.h and increase RAW_BUFFER_LENGTH");
-//         return;
-//     }
-
-//     // Show Encoding standard
-//     Serial.print("Encoding  : ");
-//     encoding(results);
-//     Serial.println("");
-
-//     // Show Code & length
-//     Serial.print("Code      : 0x");
-//     ircode(results);
-//     Serial.print(" (");
-//     Serial.print(results->bits, DEC);
-//     Serial.println(" bits)");
-// }
-// void dumpCode() {
-//     // Start declaration
-//     Serial.print("unsigned int  ");          // variable type
-//     Serial.print("rawData[");                // array name
-//     Serial.print(irrecv.results.rawlen - 1, DEC);  // array size
-//     Serial.print("] = {");                   // Start declaration
-
-//     // Dump data
-//     for (unsigned int i = 1; i < irrecv.results.rawlen; i++) {
-//         Serial.print(irrecv.results.rawbuf[i] * MICROS_PER_TICK, DEC);
-//         if (i < irrecv.results.rawlen - 1)
-//             Serial.print(","); // ',' not needed on last one
-//         if (!(i & 1))
-//             Serial.print(" ");
-//     }
-
-//     // End declaration
-//     Serial.print("};");  //
-
-//     // Comment
-//     Serial.print("  // ");
-//     encoding();
-//     Serial.print(" ");
-//     ircode();
-
-//     // Newline
-//     Serial.println("");
-
-//     // Now dump "known" codes
-//     if (irrecv.results.decode_type != UNKNOWN) {
-
-//         // Some protocols have an address
-//         if (irrecv.results.decode_type == PANASONIC) {
-//             Serial.print("unsigned int  addr = 0x");
-//             Serial.print(irrecv.results.address, HEX);
-//             Serial.println(";");
-//         }
-
-//         // All protocols have data
-//         Serial.print("unsigned int  data = 0x");
-//         Serial.print(irrecv.results.value, HEX);
-//         Serial.println(";");
-//     }
-// }
-
-// void recieveData(){
-
-//     decode_results results;        // Somewhere to store the results
-
-//     if (irrecv.decode(&results)) {  // Grab an IR code
-//         dumpInfo(&results);           // Output the results
-//         // dumpRaw(&results);            // Output the results in RAW format
-//         // dumpPronto(&results);
-//         dumpCode(&results);           // Output the results as source code
-//         Serial.println("");           // Blank line between entries
-//         irrecv.resume();              // Prepare for the next value
-//     }
-// }
-
-// void setup() {
-//     pinMode(LED_BUILTIN, OUTPUT);
-
-//     Serial.begin(115200);
-// #if defined(__AVR_ATmega32U4__)
-//     while (!Serial); //delay for Leonardo, but this loops forever for Maple Serial
-// #endif
-// #if defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL)
-//     delay(2000); // To be able to connect Serial monitor after reset and before first printout
-// #endif
-//     // Just to know which program is running on my Arduino
-//     Serial.println(F("START " __FILE__ " from " __DATE__));
-//     Serial.print(F("Ready to send IR signals at pin "));
-//     Serial.println(IR_SEND_PIN);
-
-
-//     irrecv.enableIRIn();  // Start the receiver
-
-//     Serial.print(F("Ready to receive IR signals at pin "));
-//     Serial.println(IR_RECEIVE_PIN);
-// }
-
-// void loop() {
-
-//     // sendData();
-//     recieveData();
-
-// }
-
 #include <IRremote.h>
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
+#include <elapsedMillis.h>
+#include "PinDefinitionsAndMore.h"
 
-//------------------------------------------------------------------------------
-// Tell IRremote which Arduino pin is connected to the IR Receiver (TSOP4838)
-//
-#if defined(ESP32)
-int IR_RECEIVE_PIN = 12;
-#else
-int IR_RECEIVE_PIN = 11;
-#endif
-IRrecv irrecv(IR_RECEIVE_PIN);
+/*
+ * Set input pin and output pin definitions etc.
+ */
+#define IRMP_PROTOCOL_NAMES 1        // Enable protocol number mapping to protocol strings - needs some FLASH
+#define IRMP_USE_COMPLETE_CALLBACK 1 // Enable callback functionality
+#define F_INTERRUPTS 20000           // Instead of default 15000 to support LEGO + RCMM protocols
 
-IRsend irsend;
-unsigned int irSignal[500]= {};
+//#define F_INTERRUPTS                     20000 // Instead of default 15000 to support LEGO + RCMM protocols, but this in turn disables PENTAX and GREE protocols :-(
+//#define IRMP_32_BIT                       1 // This enables MERLIN protocol, but decreases performance for AVR.
+
+#include <irmpSelectAllProtocols.h> // This enables all possible protocols
+
+/*
+ * After setting the definitions we can include the code and compile it.
+ */
+#include <irmp.c.h>
+
+IRMP_DATA irmp_data;
+
+void handleReceivedIRData();
+void initReceiver();
 
 
-bool sendFlag = false;
-//+=============================================================================
-// Configure the Arduino
-//
-void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
+bool volatile sIRMPDataAvailable = false;
 
-    Serial.begin(115200);   // Status message will be sent to PC at 9600 baud
-#if defined(__AVR_ATmega32U4__)
-    while (!Serial); //delay for Leonardo, but this loops forever for Maple Serial
-#endif
-    // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ " from " __DATE__));
+/* ### BLE Declerations */
+BLEServer *pServer = NULL;
+BLECharacteristic *pTxCharacteristic;
+BLECharacteristic *pNotifyCharacteristic;
+bool bleDeviceConnected = false;
+bool oldBleDeviceConnected = false;
+#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b" // BLEUUID((uint16_t)0xFFE0)
+#define CHARACTERISTIC_UUID_RX "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_TX "e3327c31-3123-4a99-bf27-b900c24c4e68"
+// #define CHARACTERISTIC_UUID_Notify BLEUUID((uint16_t)0xFFE1)
+elapsedMillis timeElapsed1;
 
-    irrecv.enableIRIn();  // Start the receiver
+unsigned int autoBLEDisconnectTimeout = 300000;
+String bleData = "";
+String StatusBT = "";
+bool ble_DataToSend = false;
+bool ble_DeviceNotAvailable = false;
+String macAddressString;
 
-    Serial.print(F("Ready to receive IR signals at pin "));
-    Serial.println(IR_RECEIVE_PIN);
-    Serial.print(F("Ready to send IR signals at pin "));
-    Serial.println(IR_SEND_PIN);
+bool receiverMode = false;
+
+uint32_t getMacAddress1(const uint8_t *hwaddr1)
+{
+
+    uint32_t value = 0;
+
+    value |= hwaddr1[2] << 24; //Big endian (aka "network order"):
+    value |= hwaddr1[3] << 16;
+    value |= hwaddr1[4] << 8;
+    value |= hwaddr1[5];
+    // Serial.println(hwaddr1[5]);
+    return value + 1;
 }
 
+String getMacAddress()
+{
+    uint8_t baseMac[6];
+    // Get MAC address for WiFi station
+    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+    // Serial.println(baseMac[6]);
+    uint8_t *fsas = (uint8_t *)baseMac;
+    uint32_t value1 = getMacAddress1(fsas);
+    Serial.println(value1);
 
-//+=============================================================================
-// Display IR code
-//
-void ircode(decode_results *results) {
-    // Panasonic has an Address
-    if (results->decode_type == PANASONIC) {
-        Serial.print(results->address, HEX);
-        Serial.print(":");
-    }
-
-    // Print Code
-    Serial.print(results->value, HEX);
+    // char baseMacChr[18] = {0};
+    // sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+    return String(value1);
 }
 
-//+=============================================================================
-// Display encoding type
-//
-void encoding(decode_results *results) {
-    switch (results->decode_type) {
-    default:
-    case UNKNOWN:
-        Serial.print("UNKNOWN");
-        break;
-    case NEC:
-        Serial.print("NEC");
-        break;
-    case SONY:
-        Serial.print("SONY");
-        break;
-    case RC5:
-        Serial.print("RC5");
-        break;
-    case RC6:
-        Serial.print("RC6");
-        break;
-    case DISH:
-        Serial.print("DISH");
-        break;
-    case SHARP:
-        Serial.print("SHARP");
-        break;
-    case SHARP_ALT:
-        Serial.print("SHARP_ALT");
-        break;
-    case JVC:
-        Serial.print("JVC");
-        break;
-    case SANYO:
-        Serial.print("SANYO");
-        break;
-    case MITSUBISHI:
-        Serial.print("MITSUBISHI");
-        break;
-    case SAMSUNG:
-        Serial.print("SAMSUNG");
-        break;
-    case LG:
-        Serial.print("LG");
-        break;
-    case WHYNTER:
-        Serial.print("WHYNTER");
-        break;
-    case AIWA_RC_T501:
-        Serial.print("AIWA_RC_T501");
-        break;
-    case PANASONIC:
-        Serial.print("PANASONIC");
-        break;
-    case DENON:
-        Serial.print("Denon");
-        break;
-    case BOSEWAVE:
-        Serial.print("BOSEWAVE");
-        break;
+void _handlerforBLE_API(String Data)
+{
+    Serial.println("From Handler");
+    Serial.println(Data);
+    if(Data.equals("~startIRR")){
+        initReceiver();
+        receiverMode = true;
+
     }
 }
 
-//+=============================================================================
-// Dump out the decode_results structure.
-//
-void dumpInfo(decode_results *results) {
-    // Check if the buffer overflowed
-    if (results->overflow) {
-        Serial.println("IR code too long. Edit IRremoteInt.h and increase RAW_BUFFER_LENGTH");
-        return;
+class MyServerCallbacks : public BLEServerCallbacks
+{
+    void onConnect(BLEServer *pServer)
+    {
+        bleDeviceConnected = true;
+    };
+
+    void onDisconnect(BLEServer *pServer)
+    {
+        bleDeviceConnected = false;
     }
+};
 
-    // Show Encoding standard
-    Serial.print("Encoding  : ");
-    encoding(results);
-    Serial.println("");
+class MyCallbacks : public BLECharacteristicCallbacks
+{
 
-    // Show Code & length
-    Serial.print("Code      : 0x");
-    ircode(results);
-    Serial.print(" (");
-    Serial.print(results->bits, DEC);
-    Serial.println(" bits)");
-}
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
 
-//+=============================================================================
-// Dump out the decode_results structure.
-//
-void dumpRaw(decode_results *results) {
-    // Print Raw data
-    Serial.print("Timing[");
-    Serial.print(results->rawlen - 1, DEC);
-    Serial.println("]: ");
+        std::string rxValue = pCharacteristic->getValue();
+        bleData = "";
+        if (rxValue.length() > 0)
+        {
+            Serial.println("*********");
+            Serial.print("Received Value: ");
+            for (int i = 0; i < rxValue.length(); i++)
+            {
 
-    for (unsigned int i = 1; i < results->rawlen; i++) {
-        unsigned long x = results->rawbuf[i] * MICROS_PER_TICK;
-        if (!(i & 1)) {  // even
-            Serial.print("-");
-            if (x < 1000)
-                Serial.print(" ");
-            if (x < 100)
-                Serial.print(" ");
-            Serial.print(x, DEC);
-        } else {  // odd
-            Serial.print("     ");
-            Serial.print("+");
-            if (x < 1000)
-                Serial.print(" ");
-            if (x < 100)
-                Serial.print(" ");
-            Serial.print(x, DEC);
-            if (i < results->rawlen - 1)
-                Serial.print(", "); //',' not needed for last one
+                bleData.concat(rxValue[i]);
+
+                Serial.print(rxValue[i]);
+            }
+
+            Serial.println();
+            Serial.println("*********");
+            Serial.print("bleData = ");
+            Serial.print(bleData);
+            Serial.println();
+
+            _handlerforBLE_API(bleData);
         }
-        if (!(i % 8))
-            Serial.println("");
     }
-    Serial.println("");                    // Newline
+};
+
+void initBle()
+{
+
+    String BleName = "HS-" + macAddressString;
+    BLEDevice::init(BleName.c_str());
+    BLEDevice::setMTU(512);
+
+    // Create the BLE Server
+    pServer = BLEDevice::createServer();
+    pServer->setCallbacks(new MyServerCallbacks());
+
+    // Create the BLE Service
+    BLEService *pService = pServer->createService(SERVICE_UUID);
+
+    // Create a BLE Characteristic
+
+    // Create a BLE Characteristic
+    pTxCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID_TX,
+        BLECharacteristic::PROPERTY_NOTIFY);
+
+    pTxCharacteristic->addDescriptor(new BLE2902());
+
+    BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID_RX,
+        BLECharacteristic::PROPERTY_WRITE);
+
+    pRxCharacteristic->setCallbacks(new MyCallbacks());
+
+    // Start the service
+    pService->start();
+
+    // Start advertising
+    // pServer->getAdvertising()->start();
+    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+    pAdvertising->addServiceUUID(SERVICE_UUID);
+    pAdvertising->setScanResponse(true);
+    pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+    pAdvertising->setMinPreferred(0x12);
+    BLEDevice::startAdvertising();
+    Serial.println("Waiting a client connection to notify...");
 }
+void initReceiver()
+{
+    // Serial.begin(115200);
 
-//+=============================================================================
-// Dump out the decode_results structure.
-//
-void dumpCode(decode_results *results) {
-    // Start declaration
-    if(results->rawlen > 4){
-Serial.print("unsigned int  ");          // variable type
-    Serial.print("rawData[");                // array name
-    Serial.print(results->rawlen - 1);  // array size
-    Serial.print("] = {");                   // Start declaration
-    irSignal[results->rawlen];
-    // Dump data
-    for (unsigned int i = 1; i < results->rawlen; i++) {
-        // Serial.print(results->rawbuf[i] * MICROS_PER_TICK, DEC);
-        irSignal[i]= results->rawbuf[i] * MICROS_PER_TICK;
-        // if (i < results->rawlen - 1)
-            // Serial.print(","); // ',' not needed on last one
-        // if (!(i & 1))
-            // Serial.print(" ");
-    }
+    // // Just to know which program is running on my Arduino
+    // Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_IRMP));
 
-    for (unsigned int i = 1; i < results->rawlen; i++) {
-        // Serial.print(results->rawbuf[i] * MICROS_PER_TICK, DEC);
-        Serial.print(irSignal[i]);
-        if (i < results->rawlen - 1)
-            Serial.print(","); // ',' not needed on last one
-        if (!(i & 1))
-            Serial.print(" ");
-    }
+    Serial.print(F("Ready to receive IR signals of protocols: "));
+    irmp_print_active_protocols(&Serial);
 
-    // End declaration
-    Serial.print("};");  //
-
-    // Comment
-    Serial.print("  // ");
-    encoding(results);
-    Serial.print(" ");
-    ircode(results);
-
-    // Newline
-    Serial.println("");
-
-    // Now dump "known" codes
-    if (results->decode_type != UNKNOWN) {
-
-        // Some protocols have an address
-        if (results->decode_type == PANASONIC) {
-            Serial.print("unsigned int  addr = 0x");
-            Serial.print(results->address, HEX);
-            Serial.println(";");
-        }
-
-        // All protocols have data
-        Serial.print("unsigned int  data = 0x");
-        Serial.print(results->value, HEX);
-        Serial.println(";");
-    }
-    }
-    
+    Serial.println(F("at pin " STR(IRMP_INPUT_PIN)));
 }
-
-void receiveIR(){
-  decode_results results;        // Somewhere to store the results
-
-    if (irrecv.decode(&results)) {  // Grab an IR code
-        // dumpInfo(&results);           // Output the results
-        // dumpRaw(&results);            // Output the results in RAW format
-        // dumpPronto(&results);
-        dumpCode(&results);           // Output the results as source code
-        Serial.println("");           // Blank line between entries
-        irrecv.resume();              // Prepare for the next value
-        // sendFlag = true;
-    }
-
-}
-
-
-void sendIR(){
-  int khz = 38; // 38kHz carrier frequency for the NEC protocol
+void irmp_result_print1(IRMP_DATA *aIRMPDataPtr)
+{
     /*
-     * Send data from RAM
+     * Print protocol name or number
      */
-    
-    // unsigned int irData[] = { 8950,4500, 500,600, 550,550, 550,550, 550,600, 550,550, 650,450, 550,600, 550,550, 550,1700, 550,1650, 550,1700, 550,1700, 550,1650, 550,1700, 550,550, 550,1700, 550,1650, 550,600, 550,1650, 550,1700, 550,550, 550,600, 550,550, 550,550, 550,600, 550,1650, 550,600, 550,550, 550,1700, 500,1700, 550,1700, 550,1650, 550}; // AnalysIR Batch Export (IRremote) - RAW
-        Serial.println("");
-        for (unsigned int i = 1; i < sizeof(irSignal); i++) {
-        
-        Serial.print(irSignal[i]);
-        if (i < sizeof(irSignal) - 1)
-            Serial.print(","); // ',' not needed on last one
-        if (!(i & 1))
-            Serial.print(" ");
-    }
+    // Serial.print(F("P="));
 
-    irsend.sendRaw(irSignal, sizeof(irSignal) / sizeof(irSignal[0]), khz); // Note the approach used to automatically calculate the size of the array.
-    Serial.println("Sended");
-    delay(2000);
+    // Serial.print(F("0x"));
+    String protocol = irmp_protocol_names[aIRMPDataPtr->protocol];
+    Serial.print(protocol);
+
     /*
-     * Send data direct from FLASH
+     * Print address, code and repetition flag
      */
-    // unsigned int irSignalP[] PROGMEM = { 2650,900, 450,400, 500,400, 450,850, 450,850, 900,400, 500,400, 450,400, 450,450, 450,400, 450,450, 450,400, 450,450, 450,400, 450,400, 450,450, 450,400, 500,400, 450,400, 450,450, 450,400, 900,400, 500,800, 500,400, 450 }; // AnalysIR Batch Export (IRremote) - RAW
-    // irsend.sendRaw_P(, sizeof(irSignal) / sizeof(irSignal[0]), khz); // Note the approach used to automatically calculate the size of the array.
+    uint32_t address = aIRMPDataPtr->address;
+    // Serial.print(F(" A=0x"));
+    // Serial.print(address, HEX);
 
-    // delay(5000); //In this example, the signal will be repeated every 7 seconds, approximately.
+    uint32_t command = aIRMPDataPtr->command;
+    // Serial.print(F(" C=0x"));
+    // Serial.print(command, HEX);
+    if (aIRMPDataPtr->flags & IRMP_FLAG_REPETITION)
+    {
+        Serial.print(F(" R"));
+    }
+    Serial.println();
+
+    StatusBT =  protocol + "/"+String(address,HEX) + "/"+String(command,HEX);
+        Serial.println(StatusBT);
+        ble_DataToSend= true;
 
 }
 
+/*
+ * Here we know, that data is available.
+ * Since this function is executed in Interrupt handler context, make it short and do not use delay() etc.
+ * In order to enable other interrupts you can call interrupts() (enable interrupt again) after getting data.
+ */
+
+void IRAM_ATTR handleReceivedIRData()
+
+{
+    /*
+     * Just print the data to Serial and LCD
+     */
+    irmp_get_data(&irmp_data);
+    sIRMPDataAvailable = true;
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    irmp_init();
+    irmp_irsnd_LEDFeedback(true); // Enable receive signal feedback at LED_BUILTIN
+    irmp_register_complete_callback_function(&handleReceivedIRData);
+
+    macAddressString = getMacAddress();
+
+    Serial.println("Starting BLE work!");
+
+    // Create the BLE Device
+    initBle();
+}
+void irData(){
+    if (sIRMPDataAvailable && receiverMode == true)
+    {
+        sIRMPDataAvailable = false;
+
+        /*
+         * Serial output
+         * takes 2 milliseconds at 115200
+         */
+        irmp_result_print1(&irmp_data);
+    }
+}
 
 
-//+=============================================================================
-// The repeating section of the code
-//
-void loop() {
-    receiveIR();
-    if(sendFlag){
-      sendIR();
-      sendFlag = false;
+void loop()
+{
+
+    irData();
+
+
+    if (bleDeviceConnected && ble_DataToSend)
+    {
+
+        char toSend[27];
+        StatusBT.toCharArray(toSend, StatusBT.length() + 1);
+        pTxCharacteristic->setValue(toSend);
+        pTxCharacteristic->setNotifyProperty(true);
+        pTxCharacteristic->notify();
+        // Serial.println("from loop ble_DataToSend status");
+
+        // }
+
+        delay(10); // bluetooth stack will go into congestion, if too many packets are sent
+        ble_DataToSend = false;
+    }
+    if (bleDeviceConnected && ble_DeviceNotAvailable)
+    {
+
+        char toSend[20];
+        StatusBT.toCharArray(toSend, StatusBT.length() + 1);
+        pTxCharacteristic->setValue(toSend);
+        pTxCharacteristic->setNotifyProperty(true);
+        pTxCharacteristic->notify();
+        Serial.println("from inactive ble_DataToSend status");
+
+        delay(10); // bluetooth stack will go into congestion, if too many packets are sent
+        ble_DeviceNotAvailable = false;
+    }
+
+    // disconnecting
+    if (!bleDeviceConnected && oldBleDeviceConnected)
+    {
+        delay(500);                  // give the bluetooth stack the chance to get things ready
+        pServer->startAdvertising(); // restart advertising
+        Serial.println("start advertising");
+        oldBleDeviceConnected = bleDeviceConnected;
+    }
+    // connecting
+    if (bleDeviceConnected && !oldBleDeviceConnected)
+    {
+        // do stuff here on connecting
+
+        elapsedMillis timeElapsed1;
+        oldBleDeviceConnected = bleDeviceConnected;
+    }
+    if (bleDeviceConnected && (timeElapsed1 > autoBLEDisconnectTimeout))
+    {
+        Serial.println("disconnected");
+        pServer->disconnect(pServer->getConnId());
+        timeElapsed1 = 0;
     }
 }
